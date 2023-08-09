@@ -3,4 +3,4 @@ Developed by Holly Metzger for Orion Robotics
 
 This is a tip calculator for restaurants with unique tip situations. It is built with the goal of being endlessly customizable and easy to use, to streamline the payroll process.
 
-Orion Robotics was created with a dream of automating restaurant processes as much as possible, while still giving customers an intimate experience.
+Orion Robotics was created with a dream of automating restaurant processes as much as possible, while still giving customers an intimate and enjoyable dining experience.
