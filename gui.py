@@ -1,3 +1,5 @@
+# Contains GUI
+
 from tkinter import *
 from tkinter import ttk
 import calculator as calc

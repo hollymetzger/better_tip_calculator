@@ -1,10 +1,9 @@
+# Contains functions for working with payment data
+
 from square.client import Client
 import requests
 import json
 import os
-import csv
-import sys
-import config
 import mytime
     
 class Payment:

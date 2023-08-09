@@ -1,3 +1,5 @@
+# Stores settings and information
+
 from datetime import datetime, timezone, timedelta
 
 # start and end times, enter beginning and end of pay period you wish

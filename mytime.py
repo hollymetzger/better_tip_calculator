@@ -1,7 +1,8 @@
+# Contains functions for working with time
+
 from datetime import datetime, timezone, timedelta
 from dateutil import parser
 
-# scary time formatting functions
 def convert_to_est(time_str):
     dt_time = convert_to_datetime(time_str)
     correct_time = dt_time + timedelta(hours = -4)

@@ -1,3 +1,5 @@
+# Main file which controls the high level processes and computes tips
+
 # import built-in modules
 import csv
 import datetime

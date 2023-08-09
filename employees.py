@@ -1,3 +1,5 @@
+# Contains functions for working with employee and shift data
+
 from square.client import Client
 import requests
 import json
@@ -149,10 +151,3 @@ def divide_shifts(employees, shifts):
     return employees
 
 
-def days_between(start, end):
-    # takes two datetimes and returns a list of datetimes including start, not including end
-    days = []
-    current_day = start
-    while mytime.is_time_before(current_day, end):
-        days.append(current_day)
-        current_day += timedelta(days=1)
