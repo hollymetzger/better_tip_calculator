@@ -16,15 +16,22 @@ payment_list = []
 shift_list = []
 employee_list = []
 
-# takes two datetime objects from gui.py
+# takes two datetime objects in EST from gui.py
 def calculate(start, end, export_file_path):
 
     # get data from Square database using their API
-    print('loading payment data...')
+    print('loading employee data...')
+
+    shifts = employees.load_shifts(start, end)
+    employee_list = employees.load_employees()
+    employee_list = employees.divide_shifts(employee_list, shifts)
+
+
+    print('loading tips data...')
 
     payment_list = []
     # sushi tips, not tied to specific chef since we tip them in cash
-    sushi_tips = 0.0
+    sushi_tips = {}
 
     loop_start = start
     loop_end = start + datetime.timedelta(days=1)
@@ -32,8 +39,9 @@ def calculate(start, end, export_file_path):
     while True:
         if loop_end > end:
             break
-        plist = payments.load_payments(loop_start, loop_end)
 
+        # load payments for the day
+        plist = payments.load_payments(loop_start, loop_end)
         # load_payments can only load 100 at a time, loops through the rest of the day if there are > 100 payments
         if len(plist) % 100 == 0:
             last_time =  mytime.convert_to_datetime(payment_list[len(payment_list)-1].time)
@@ -45,76 +53,93 @@ def calculate(start, end, export_file_path):
                     plist.append(p)
                 last_time = mytime.convert_to_datetime(payment_list[len(payment_list)-1].time)
 
+        this_day = loop_start.strftime("%m/%d/%Y")
+
+        for p in plist:
+            actives = employees.get_active_employees(employee_list, p)
+            
+            # add sushi tip
+            if p.section == '238CS149B2003752':
+                if this_day in sushi_tips:
+                    sushi_tips[this_day] += p.tip * 0.5
+                else:
+                    sushi_tips.update({this_day:0})
+                    sushi_tips[this_day] += p.tip * 0.5
+                p.tip *= 0.5
+            else:
+                if this_day in sushi_tips:
+                    sushi_tips[this_day] += p.tip * 0.12
+                else:
+                    sushi_tips.update({this_day:0})
+                    sushi_tips[this_day] += p.tip * 0.12
+                p.tip *= 0.88
+
+            for a in actives:
+                if this_day in a.tips:
+                    a.tips[this_day] += (p.tip/len(actives))
+                else:
+                    a.tips.update({this_day:0})
+                    a.tips[this_day] += (p.tip/len(actives))
+
+
         payment_list = payment_list + plist
         loop_start += datetime.timedelta(days=1)
         loop_end += datetime.timedelta(days=1)
-
-    print("Verify payments:")
-    for p in payment_list:
-        print(p.time, p.tip)
 
     totaltips = 0
     for p in payment_list:
         totaltips += p.tip
 
-    print('loading employee data...')
-    shifts = employees.load_shifts(start, end)
-    for s in shifts:
-        print(s.type)
-    employee_list = employees.load_employees()
-    employee_list = employees.divide_shifts(employee_list, shifts)
-
-    print("Verify employee shifts:")
-    for e in employee_list:
-        print(e.name)
-        for s in e.shifts:
-            print(s.start, s.end)
-
     print("calculating tips...")
-    for p in payment_list:
-        actives = employees.get_active_employees(employee_list, p)
-        
-
-        # subtract sushi tip
-        if p.section == '238CS149B2003752':
-            sushi_tips += p.tip * 0.5
-            p.tip *= 0.5
-        else:
-            sushi_tips += p.tip * 0.12
-            p.tip *= 0.88
-
-        for a in actives:
-            
-            print("adding", p.tip/len(actives), "to", a.name)
-            a.tips += p.tip/len(actives)
 
     print()
-    print("total tips")
+    print("tips per employee:")
     emptips = 0
     for e in employee_list:
-        if (e.tips > 0):
-            print(e.name, round(e.tips, 2))
-            emptips += e.tips
-    print("Sushi: ", round(sushi_tips, 2))
-    print("everyone's assigned tips: ", round(sushi_tips+emptips, 2))
-    # print('total loaded tips: ', totaltips)
+        print(e.name)
+        sum = 0
+        for day in e.tips:
+            sum += e.tips[day]
+        if sum > 0:
+            print(e.name)
+            for day in e.tips:
+                print(round(e.tips[day], 2))
+            emptips += sum
+    # print("Sushi: ", round(sushi_tips, 2))
+    # print("everyone's assigned tips: ", round(sushi_tips+emptips, 2))
+    print('total loaded tips: ', totaltips)
 
     print('exporting csv file...')
-    export(employee_list, sushi_tips, export_file_path)
+    export(employee_list, sushi_tips, export_file_path, start, end)
 
     print('done!')
     return
 
-def export(emps, sushi_tips, export_file_path):
+def export(emps, sushi_tips, export_file_path, start, end):
+    fieldnames = ['employee']
+    days = mytime.days_between(start, end)
+    fieldnames += days
     with open(export_file_path, 'w', newline='') as export_file:
-        writer = csv.DictWriter(export_file, fieldnames=['employee','tips'])
+        writer = csv.DictWriter(export_file, fieldnames=fieldnames)
         writer.writeheader()
+
         for e in emps:
-            writer.writerow({'employee': e.name, 'tips': e.tips})
-        writer.writerow({'employee': 'Sushi Chefs', 'tips': sushi_tips})
+            emp = {'employee': e.name}
+            tips = {}
+            for day in e.tips:
+                tips[day] = round(e.tips[day], 2)
+            emp.update(tips)
+            writer.writerow(emp)
+        
+        sushi = {'employee': 'Sushi'}
+        sushi.update(sushi_tips)
+        writer.writerow(sushi)
 
     return
 
+start = mytime.conversion_for_gui('08/01/23')
+end = mytime.conversion_for_gui('08/08/23')
+calculate(start, end, 'newtest.csv')
 
 # TODO: add 'type' to shift, and only divide tips among waiters
 # TODO: change tips format to be dict of days and tips per day

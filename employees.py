@@ -68,7 +68,7 @@ def load_employees():
         weight = 100
         if name in weight_dict:
             weight = weight_dict[name]
-        employee = Employee(name, e['id'], weight, 0, [])
+        employee = Employee(name, e['id'], weight, {}, [])
         employee_list.append(employee)
     return employee_list
 
@@ -126,6 +126,7 @@ def load_shifts(start, end):
 
     response = requests.post(url, headers=headers, params=params)
     raw_shifts = json.loads(response.text)['shifts']
+    
     shifts = []
 
     for s in raw_shifts:

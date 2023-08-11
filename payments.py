@@ -5,6 +5,7 @@ import requests
 import json
 import os
 import mytime
+import datetime
     
 class Payment:
     def __init__(self, section, tip, time, location):
@@ -15,6 +16,10 @@ class Payment:
 
 def load_payments(start, end):
     # Get payment data from Square database
+
+    # Correct the time zones so it loads only the correct payments
+    start += datetime.timedelta(hours=4)
+    end += datetime.timedelta(hours=4)
 
     # Set up Square API
     headers = {
@@ -33,12 +38,11 @@ def load_payments(start, end):
         raw_payments = json.loads(response.text)['payments']
     except KeyError:
         return
+    
     payments = []
 
     for p in raw_payments:
-        # subtract 4 hours from payment time to get EST timezone
-        bad_timezone_time = p['created_at']
-        payment_time = mytime.convert_to_est(bad_timezone_time)
+        payment_time = mytime.convert_to_est(p['created_at'])
         if 'device_details' in p:
             section = p['device_details']['device_id']
         else:

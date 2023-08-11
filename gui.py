@@ -18,10 +18,9 @@ def ClickMe():
     return
 
 def Run_Report():
-    # get start and end
+    # get start and end times in user's time zone and convert them to UTC for calculating
     start = mytime.conversion_for_gui(user_start.get())
     end = mytime.conversion_for_gui(user_end.get())
-    print("start: ", start, 'end:', end)
     calc.calculate(start, end, 'csvfile.csv')
     return
 
@@ -59,7 +58,7 @@ startentry = ttk.Entry(
     calender,
     textvariable = user_start
 )
-startentry.insert(0, '08/01/23')
+startentry.insert(0, '08/06/23')
 startentry.grid()
     
 endlabel = ttk.Label(
@@ -72,7 +71,7 @@ endentry = ttk.Entry(
     calender,
     textvariable = user_end
 )
-endentry.insert(0, '08/02/23')
+endentry.insert(0, '08/07/23')
 endentry.grid()
 
 saveas = Button(
