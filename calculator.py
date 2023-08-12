@@ -41,6 +41,7 @@ def calculate(start, end, export_file_path):
             break
 
         # load payments for the day
+        print("loading", loop_start)
         plist = payments.load_payments(loop_start, loop_end)
         # load_payments can only load 100 at a time, loops through the rest of the day if there are > 100 payments
         if len(plist) % 100 == 0:
@@ -105,12 +106,10 @@ def calculate(start, end, export_file_path):
             for day in e.tips:
                 print(round(e.tips[day], 2))
             emptips += sum
-    # print("Sushi: ", round(sushi_tips, 2))
-    # print("everyone's assigned tips: ", round(sushi_tips+emptips, 2))
     print('total loaded tips: ', totaltips)
 
     print('exporting csv file...')
-    export(employee_list, sushi_tips, export_file_path, start, end)
+    export(employee_list, sushi_tips, str(export_file_path), start, end)
 
     print('done!')
     return
@@ -137,11 +136,4 @@ def export(emps, sushi_tips, export_file_path, start, end):
 
     return
 
-start = mytime.conversion_for_gui('08/01/23')
-end = mytime.conversion_for_gui('08/08/23')
-calculate(start, end, 'newtest.csv')
-
 # TODO: add 'type' to shift, and only divide tips among waiters
-# TODO: change tips format to be dict of days and tips per day
-# TODO: change exported csv to contain columns of each day, and a total column
-# TODO: implement export location functionality using the tkinter filedialog.askopenfilename

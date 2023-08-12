@@ -53,6 +53,7 @@ def load_employees():
     raw_employees = json.loads(response.text)['team_members']
     employee_list = []
 
+    '''
     # open csv file containing the employee tip weights
     weight_dict = {}
     with open ('employee_tip_weights.csv') as weightsfile:
@@ -61,13 +62,15 @@ def load_employees():
             name = row['Name']
             weight = int(row['Weight'])
             weight_dict[name] = weight
-
+    '''
     # build list of employees
     for e in raw_employees:
         name = f"{e['given_name']} {e['family_name']}"
         weight = 100
+        '''
         if name in weight_dict:
             weight = weight_dict[name]
+        '''
         employee = Employee(name, e['id'], weight, {}, [])
         employee_list.append(employee)
     return employee_list

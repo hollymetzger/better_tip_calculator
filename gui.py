@@ -1,6 +1,7 @@
 # Contains GUI
 
 from tkinter import *
+from tkinter import filedialog
 from tkinter import ttk
 import calculator as calc
 import employees
@@ -13,15 +14,22 @@ root.title("Tip Calculator")
 emps = employees.load_employees()
 user_start = StringVar()
 user_end = StringVar()
+export_location = StringVar()
+export_location.set('File Path')
 
-def ClickMe():
+def get_export_path():
+    print("calling get export path")
+    global export_location
+    export_location.set(filedialog.asksaveasfilename(defaultextension=".csv"))
     return
 
 def Run_Report():
     # get start and end times in user's time zone and convert them to UTC for calculating
     start = mytime.conversion_for_gui(user_start.get())
     end = mytime.conversion_for_gui(user_end.get())
-    calc.calculate(start, end, 'csvfile.csv')
+    export_location_string = export_location.get()
+    print("exporting to ", export_location_string)
+    calc.calculate(start, end, export_location_string)
     return
 
 mainframe = ttk.Frame(
@@ -78,17 +86,16 @@ saveas = Button(
     mainframe,
     text="Save as...",
     font=("Arial", 14),
-    command=ClickMe
+    command=get_export_path
 )
 saveas.grid(row=2)
 
-export_location = StringVar()
-exportloc = Label(
+export_location_label = Label(
     mainframe,
     textvariable = export_location,
     font=("Arial", 14)
 )
-exportloc.grid(row=3)
+export_location_label.grid()
 
 runreport = ttk.Button(
     text="Run Report",
