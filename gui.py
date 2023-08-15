@@ -11,7 +11,6 @@ import mytime
 root = Tk()
 root.title("Tip Calculator")
 
-emps = employees.load_employees()
 user_start = StringVar()
 user_end = StringVar()
 export_location = StringVar()
@@ -32,6 +31,9 @@ def Run_Report():
     calc.calculate(start, end, export_location_string)
     return
 
+def donothing():
+    return
+
 mainframe = ttk.Frame(
     root,
     padding="13 13 22 22"
@@ -40,6 +42,24 @@ mainframe = ttk.Frame(
 mainframe.grid(column=0, row=0, sticky=(N, W, E, S), padx=30, pady=20)
 mainframe.columnconfigure(0, weight=1)
 mainframe.rowconfigure(0, weight=1)
+
+menu_bar = Menu(root)
+
+menubar = Menu(root)
+filemenu = Menu(menubar, tearoff=0)
+filemenu.add_command(label="New", command=donothing)
+filemenu.add_command(label="Open", command=donothing)
+filemenu.add_command(label="Save", command=donothing)
+filemenu.add_separator()
+filemenu.add_command(label="Exit", command=root.quit)
+menubar.add_cascade(label="File", menu=filemenu)
+
+helpmenu = Menu(menubar, tearoff=0)
+helpmenu.add_command(label="Help Index", command=donothing)
+helpmenu.add_command(label="About...", command=donothing)
+menubar.add_cascade(label="Help", menu=helpmenu)
+
+root.config(menu=menubar)
 
 calender = ttk.Frame(
     mainframe,
@@ -66,7 +86,7 @@ startentry = ttk.Entry(
     calender,
     textvariable = user_start
 )
-startentry.insert(0, '08/06/23')
+startentry.insert(0, '08/14/23')
 startentry.grid()
     
 endlabel = ttk.Label(
@@ -79,7 +99,7 @@ endentry = ttk.Entry(
     calender,
     textvariable = user_end
 )
-endentry.insert(0, '08/07/23')
+endentry.insert(0, '08/15/23')
 endentry.grid()
 
 saveas = Button(

@@ -56,3 +56,11 @@ def days_between(start, end):
         days.append(current_day.strftime('%m/%d/%Y'))
         current_day += timedelta(days=1)
     return days
+
+# takes two strings and returns true if they are exactly 24 hours apart, indicating that the employee forgot to clock out
+def forgot_to_clock_out(start, end):
+    dt_start = parser.parse(start)
+    dt_end = parser.parse(end)
+    if dt_end == dt_start + timedelta(hours=24):
+        return True
+    return False

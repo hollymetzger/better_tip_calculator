@@ -15,6 +15,8 @@ import payments
 import config
 
 # global lists
+global payment_list
+payment_list = []
 shift_list = []
 employee_list = []
 
@@ -32,9 +34,10 @@ def calculate(start, end, export_file_path):
 
     print('loading tips data...')
 
+    payment_list = []
+
     # sushi tips, not tied to specific chef since we tip them in cash
     sushi_tips = {}
-    total_tips = 0
 
     loop_start = start
     loop_end = start + datetime.timedelta(days=1)
@@ -60,12 +63,16 @@ def calculate(start, end, export_file_path):
                 last_time = mytime.convert_to_datetime(plist[len(plist)-1].time)
 
         this_day = loop_start.strftime("%m/%d/%Y")
-        tips_this_day = 0
+
         for p in plist:
             config.total_tips_loaded += p.tip
-            tips_this_day += p.tip
 
+            print()
+            print(mytime.make_readable(p.time), '\t', round(p.tip, 2))
             actives = employees.get_active_employees(employee_list, p)
+            print("Active employees:")
+            for a in actives:
+                print(a.name)
             
             # add sushi tip
             # if the payment was from sushi bar card reader, give sushi 50%
@@ -77,6 +84,7 @@ def calculate(start, end, export_file_path):
                 else:
                     sushi_tips.update({this_day:0})
                     sushi_tips[this_day] += p.tip * 0.5
+                print(f"adding {p.tip*0.5} to sushi tips")
                 # change the tip amount to what is left after sushi tip out, to be divided amongst waiters
                 p.tip *= 0.5
 
@@ -95,21 +103,48 @@ def calculate(start, end, export_file_path):
             for a in actives:
                 if this_day in a.tips:
                     a.tips[this_day] += (p.tip/len(actives))
+                    print(f"adding {p.tip/len(actives)} to {a.name}'s tips")
                 else:
                     a.tips.update({this_day:0})
                     a.tips[this_day] += (p.tip/len(actives))
-            
-        print(f"Tips for {this_day}: {tips_this_day}")
-        total_tips += tips_this_day
+                    print(f"adding {p.tip/len(actives)} to {a.name}'s tips")
+
+
+        payment_list = payment_list + plist
         loop_start += datetime.timedelta(days=1)
         loop_end += datetime.timedelta(days=1)
 
+    totaltips = 0
+    for p in payment_list:
+        totaltips += p.tip
+
+    print(f"Total tips loaded by payment_list: {totaltips}\nTotal tips loaded from config: {config.total_tips_loaded}")
+
+    print("calculating tips...")
+
+    print()
+    print("tips per employee:")
+    emptips = 0
+    for e in employee_list:
+        sum = 0
+        for day in e.tips:
+            sum += e.tips[day]
+        if sum > 0:
+            print(e.name)
+            for day in e.tips:
+                print(day, round(e.tips[day], 2))
+            emptips += sum
+    print('total loaded tips: ', totaltips)
+
+    print('exporting csv file...')
     export(employee_list, sushi_tips, str(export_file_path), start, end)
 
+    print('done!')
+
     timing_end = time.time()
+
     elapsed_time = timing_end - timing_start
-    print(f"Tips from config: {config.total_tips_loaded}\nTips from calculator: {total_tips}")
-    print(f"done!\nElapsed time: {round(elapsed_time, 3)}")
+    print(f"Elapsed time: {round(elapsed_time, 3)}")
     return
 
 def export(emps, sushi_tips, export_file_path, start, end):

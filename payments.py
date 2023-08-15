@@ -46,7 +46,7 @@ def load_payments(start, end):
         if 'device_details' in p:
             section = p['device_details']['device_id']
         else:
-            section = 'error'
+            section = 'no device details'
         if 'tip_money' in p:
             tip_money = p['tip_money']
             tip_amount = float(tip_money['amount']) / 100.0

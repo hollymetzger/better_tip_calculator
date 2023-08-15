@@ -134,8 +134,14 @@ def load_shifts(start, end):
 
     for s in raw_shifts:
         if ('end_at') in s:
-            shift = Shift(s['employee_id'], s['location_id'], s['wage']['title'], s['start_at'], s['end_at'])
-            shifts.append(shift)
+            if (mytime.forgot_to_clock_out(s['start_at'], s['end_at'])):
+                start_time = mytime.convert_to_datetime(s['start_at'])
+                end_time = start_time + timedelta(hours = 10)
+                shift = Shift(s['employee_id'], s['location_id'], s['wage']['title'], s['start_at'], end_time.strftime('%Y-%m-%dT%H:%M:%S'))
+                shifts.append(shift)
+            else:
+                shift = Shift(s['employee_id'], s['location_id'], s['wage']['title'], s['start_at'], s['end_at'])
+                shifts.append(shift)
         else:
             start_time = mytime.convert_to_datetime(s['start_at'])
             # if employee is still clocked in, assume shift will end 10 hours
