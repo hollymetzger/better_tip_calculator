@@ -6,15 +6,3 @@ This is a tip calculator for restaurants with unique tip situations. It is built
 ## What is Orion Robotics?
 
 Orion Robotics was created with a dream of automating restaurant processes as much as possible, while still giving customers an intimate and enjoyable dining experience.
-
-
-todo: add menu options
-
-menu:
-settings
-- 
-help
-login
-- authorize square account
-- log out
-uninstall
